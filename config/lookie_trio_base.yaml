@@ -1,0 +1,15 @@
+# /**/lookie_trio_base matches the node in any namespace.
+/**/lookie_trio_base:
+  ros__parameters:
+    port_name: can_chassis
+    # Attempts to detect and connect to the base, one per second, before the node gives up.
+    connect_retries: 5
+    odom_frame: odom
+    base_frame: base_link
+    # Set false when another node (e.g. a lidar odometry) broadcasts odom_frame -> base_frame.
+    publish_odom_tf: true
+    # Signs [x, y, wz] (+1 or -1) mapping the base to the ROS convention (x forward, y left, wz counter-clockwise).
+    cmd_velocity_signs: [1, -1, 1]    # positive linear.y drives this base to its right
+    odom_velocity_signs: [-1, 1, 1]   # forward feedback is reversed
+    # Seconds without CAN motion state before odometry pauses.
+    feedback_timeout: 0.5
