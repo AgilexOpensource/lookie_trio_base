@@ -26,7 +26,7 @@ class LookieTrioBase : public rclcpp::Node
 public:
   explicit LookieTrioBase(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-  // Detects the protocol, connects to the CAN bus and starts publishing; false when the base is absent.
+  // Connects to the CAN bus and starts publishing; false when the base is absent.
   bool Start();
 
   // Sends a zero velocity so that the base does not keep the last command.
@@ -35,7 +35,7 @@ public:
 private:
   using Robot = westonrobot::ScoutMiniOmniRobot;
 
-  // Detect the protocol and open the CAN bus; false leaves the base untouched.
+  // Opens the CAN bus and enables commanded mode; false leaves the base untouched.
   bool Connect();
 
   void OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr msg);

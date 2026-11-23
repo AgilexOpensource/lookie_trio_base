@@ -2,7 +2,7 @@
 /**/lookie_trio_base:
   ros__parameters:
     port_name: can_chassis
-    # Attempts to detect and connect to the base, one per second, before the node gives up.
+    # Attempts to open the bus and connect to the base, one per second, before the node gives up.
     connect_retries: 5
     odom_frame: odom
     base_frame: base_link

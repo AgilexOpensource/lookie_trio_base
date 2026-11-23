@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-Lookie Trio 全向底盘的 ROS 2 驱动，基于 [ugv_sdk](https://github.com/westonrobot/ugv_sdk)（`ScoutMiniOmniRobot`，AGX_V1 或 AGX_V2 协议，三个驱动电机共用一个驱动器）。
+Lookie Trio 全向底盘的 ROS 2 驱动，基于 [ugv_sdk](https://github.com/westonrobot/ugv_sdk)（`ScoutMiniOmniRobot`，AGX_V2 协议，三个驱动电机共用一个驱动器）。
 
 接口沿用 ROS 底盘驱动的常见约定，只使用标准消息：输入 `cmd_vel`；输出 `odom`、`odom` → `base_link` TF、`battery_state`、以 `sensor_msgs/Joy` 表示的遥控器，以及 `/diagnostics`。
 
@@ -34,7 +34,7 @@ sudo ip link set can_chassis up type can bitrate 500000
 ros2 launch lookie_trio_base lookie_trio_base.launch.py
 ```
 
-节点启动时在 `port_name` 上探测 AGX_V1 或 AGX_V2 协议。5 s 内没有底盘应答则报错并以退出码 1 退出。
+节点启动时打开 `port_name` 并使能指令模式。若 `connect_retries` 次尝试仍无法打开总线，则报错并以退出码 1 退出；底盘无应答的情况通过反馈诊断上报。
 
 在另一个终端查看反馈并发送一段短指令。**指令会让底盘运动。**
 

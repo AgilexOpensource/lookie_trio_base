@@ -2,7 +2,7 @@
 
 [中文](README.zh-CN.md)
 
-ROS 2 driver for the Lookie Trio omnidirectional base, built on [ugv_sdk](https://github.com/westonrobot/ugv_sdk) (`ScoutMiniOmniRobot`, AGX_V1 or AGX_V2 protocol, three drive motors on one driver).
+ROS 2 driver for the Lookie Trio omnidirectional base, built on [ugv_sdk](https://github.com/westonrobot/ugv_sdk) (`ScoutMiniOmniRobot`, AGX_V2 protocol, three drive motors on one driver).
 
 It follows the usual ROS base driver layout and uses standard messages only: `cmd_vel` in; `odom`, the `odom` → `base_link` TF, `battery_state`, the remote controller as `sensor_msgs/Joy` and `/diagnostics` out.
 
@@ -34,7 +34,7 @@ sudo ip link set can_chassis up type can bitrate 500000
 ros2 launch lookie_trio_base lookie_trio_base.launch.py
 ```
 
-At startup the node detects the AGX_V1 or AGX_V2 protocol on `port_name`. If no base answers within 5 s it logs an error and exits with code 1.
+At startup the node opens `port_name` and enables commanded mode. If the bus cannot be opened in `connect_retries` attempts it logs an error and exits with code 1; a base that stays silent is reported through the feedback diagnostics instead.
 
 In another terminal, check the feedback and send a short command. **Commands move the base.**
 
@@ -99,7 +99,7 @@ Status names start with the node's full name, for example `/lookie_trio_base: ba
 | Parameter | Default | Description |
 |---|---|---|
 | `port_name` | `can_chassis` | CAN interface of the base |
-| `connect_retries` | `5` | Attempts to detect and connect to the base, one per second, before the node gives up and exits |
+| `connect_retries` | `5` | Attempts to open the CAN bus and connect to the base, one per second, before the node gives up and exits |
 | `odom_frame` | `odom` | Odometry frame |
 | `base_frame` | `base_link` | Base frame |
 | `publish_odom_tf` | `true` | Broadcast the `odom_frame` → `base_frame` TF; set `false` when another node owns it |

@@ -12,8 +12,6 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include "ugv_sdk/utilities/protocol_detector.hpp"
-
 namespace lookie_trio_base
 {
 namespace
@@ -86,7 +84,7 @@ LookieTrioBase::LookieTrioBase(const rclcpp::NodeOptions & options)
   port_name_ = declare_parameter("port_name", "can_chassis", ReadOnly("CAN interface of the base"));
   connect_retries_ = std::max<int64_t>(
     declare_parameter("connect_retries", 5,
-    ReadOnly("Attempts to detect and connect to the base, one per second, before giving up")), 1);
+    ReadOnly("Attempts to open the bus and connect to the base, one per second, before giving up")), 1);
   odom_frame_ = declare_parameter("odom_frame", "odom", ReadOnly("Odometry frame id"));
   base_frame_ = declare_parameter("base_frame", "base_link", ReadOnly("Base frame id"));
   publish_odom_tf_ = declare_parameter(
@@ -113,19 +111,13 @@ LookieTrioBase::LookieTrioBase(const rclcpp::NodeOptions & options)
 
 bool LookieTrioBase::Connect()
 {
-  westonrobot::ProtocolDetector detector;
-  if (!detector.Connect(port_name_)) {
-    RCLCPP_WARN(get_logger(), "cannot open CAN interface %s", port_name_.c_str());
-    return false;
-  }
-  const auto protocol = detector.DetectProtocolVersion(5);
-  if (protocol != ProtocolVersion::AGX_V1 && protocol != ProtocolVersion::AGX_V2) {
-    RCLCPP_WARN(get_logger(), "no AgileX base found on %s", port_name_.c_str());
-    return false;
-  }
-  robot_ = std::make_shared<Robot>(protocol);
+  // The chassis model is fixed by this package, so the protocol does not need to
+  // be sniffed on the bus. Sniffing used a ProtocolDetector, whose CAN callback
+  // stays bound to the detector after it goes out of scope; a base that is not
+  // answering now shows up as missing feedback instead, which Publish() reports.
+  robot_ = std::make_shared<Robot>(ProtocolVersion::AGX_V2);
   if (!robot_->Connect(port_name_)) {
-    RCLCPP_WARN(get_logger(), "failed to connect to the base on %s", port_name_.c_str());
+    RCLCPP_WARN(get_logger(), "cannot open CAN interface %s", port_name_.c_str());
     robot_.reset();
     return false;
   }
