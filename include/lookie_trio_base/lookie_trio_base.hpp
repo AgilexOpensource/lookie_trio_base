@@ -11,7 +11,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/battery_state.hpp>
 #include <sensor_msgs/msg/joy.hpp>
-#include <std_srvs/srv/set_bool.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 
 #include "lookie_trio_base/odometry.hpp"
@@ -39,10 +38,6 @@ private:
   bool Connect();
 
   void OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr msg);
-  // Keeps the front light on or off; the rear light is not driven.
-  void OnFrontLight(
-    const std_srvs::srv::SetBool::Request::SharedPtr request,
-    std_srvs::srv::SetBool::Response::SharedPtr response);
 
   void Publish();
   void PublishOdometry(double linear_speed, double lateral_speed, double angular_speed, double dt);
@@ -64,7 +59,6 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::Joy>::SharedPtr joy_pub_;
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diagnostics_pub_;
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
-  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr front_light_srv_;
   std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   rclcpp::TimerBase::SharedPtr timer_;
 
@@ -72,7 +66,6 @@ private:
   rclcpp::Time last_report_time_;
   bool feedback_alive_ = false;
   bool feedback_seen_ = false;
-  bool front_light_on_ = false;
   double x_ = 0.0;
   double y_ = 0.0;
   double theta_ = 0.0;

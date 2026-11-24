@@ -15,7 +15,6 @@ find_package(diagnostic_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
@@ -27,7 +26,7 @@ add_executable(lookie_trio_base_node
 )
 target_include_directories(lookie_trio_base_node PRIVATE include)
 ament_target_dependencies(lookie_trio_base_node
-  rclcpp rcl_interfaces diagnostic_msgs geometry_msgs nav_msgs sensor_msgs std_srvs tf2 tf2_ros tf2_geometry_msgs
+  rclcpp rcl_interfaces diagnostic_msgs geometry_msgs nav_msgs sensor_msgs tf2 tf2_ros tf2_geometry_msgs
 )
 target_link_libraries(lookie_trio_base_node ugv_sdk)
 

@@ -58,7 +58,6 @@ The node is `lookie_trio_base`. Topic names are relative to its namespace; with 
 | `battery_state` | Published topic | `sensor_msgs/msg/BatteryState` | Battery voltage, 1 Hz; the other fields are unknown (NaN) |
 | `rc/joy` | Published topic | `sensor_msgs/msg/Joy` | Remote controller, 50 Hz; see [Remote controller](#remote-controller) |
 | `/diagnostics` | Published topic | `diagnostic_msgs/msg/DiagnosticArray` | Base and motor state, 1 Hz; see [Diagnostics](#diagnostics) |
-| `front_light` | Service | `std_srvs/srv/SetBool` | Front light on (`true`) or off (`false`); see [Front light](#front-light) |
 
 `odom`, `battery_state` and `rc/joy` are published only while CAN feedback is fresh.
 
@@ -69,25 +68,13 @@ The node is `lookie_trio_base`. Topic names are relative to its namespace; with 
 | `axes` | 9 entries, -1.0 to 1.0: left stick horizontal, left stick vertical, right stick horizontal, right stick vertical, knob VRA, then switches SWA, SWB, SWC, SWD as 1.0 up, 0.0 middle, -1.0 down |
 | `buttons` | empty |
 
-### Front light
-
-`front_light` takes a `std_srvs/srv/SetBool` request: `data: true` switches the light on, `data: false` switches it off. `success` is set once the command is handed to the base, and `message` repeats the new state.
-
-Only the front light is part of this interface; a rear light is not driven. The driver sets the command-control flag with every request and never clears it, so after the first call the lights stay under ROS control instead of following the physical switch:
-
-```bash
-ros2 service call /front_light std_srvs/srv/SetBool "{data: true}"
-```
-
-The current state is also reported in [Diagnostics](#diagnostics).
-
 ### Diagnostics
 
 Status names start with the node's full name, for example `/lookie_trio_base: base`, so two nodes in the same graph never collide on `/diagnostics`.
 
 | Status | Level | Values |
 |---|---|---|
-| `base` | OK; WARN when the base is not in CAN command mode and ignores `cmd_vel`; STALE without CAN feedback | `control_mode`, `vehicle_state`, `error_code`, `battery_voltage` (V), `front_light` |
+| `base` | OK; WARN when the base is not in CAN command mode and ignores `cmd_vel`; STALE without CAN feedback | `control_mode`, `vehicle_state`, `error_code`, `battery_voltage` (V) |
 | `motor 1` … `motor 3` | OK; STALE without CAN feedback | `rpm`, `current` (A), `pulse_count`, `driver_voltage` (V), `driver_temperature` (°C), `motor_temperature` (°C), `driver_state` |
 
 `vehicle_state`, `error_code` and `driver_state` are the raw codes reported by the base firmware.
@@ -151,7 +138,6 @@ The topics are then `/base1/cmd_vel`, `/base1/odom` and so on. Use different `RO
 - On shutdown the node sends a zero velocity, so the base does not keep the last command.
 - When no CAN motion state has arrived for `feedback_timeout`, odometry and TF pause instead of integrating the last cached velocity, and the node logs a warning; they resume with a log line once feedback returns. Diagnostics turn STALE meanwhile.
 - Battery voltage is in volts (the SDK value is scaled by 0.1 for this base).
-- The front light follows the `front_light` service; no other light state is touched.
 - The three motors share one driver, which sends a single low-speed state frame: the driver values are the same in every `motor` diagnostic.
 
 ## Troubleshooting

@@ -58,7 +58,6 @@ ros2 topic echo --once /odom
 | `battery_state` | 发布话题 | `sensor_msgs/msg/BatteryState` | 电池电压，1 Hz；其他字段未知（NaN） |
 | `rc/joy` | 发布话题 | `sensor_msgs/msg/Joy` | 遥控器，50 Hz，见[遥控器](#遥控器) |
 | `/diagnostics` | 发布话题 | `diagnostic_msgs/msg/DiagnosticArray` | 底盘和电机状态，1 Hz，见[诊断](#诊断) |
-| `front_light` | 服务 | `std_srvs/srv/SetBool` | 前灯开（`true`）或关（`false`），见[前灯](#前灯) |
 
 `odom`、`battery_state` 和 `rc/joy` 仅在 CAN 反馈新鲜时发布。
 
@@ -69,25 +68,13 @@ ros2 topic echo --once /odom
 | `axes` | 共 9 项，-1.0 到 1.0：左摇杆水平、左摇杆垂直、右摇杆水平、右摇杆垂直、旋钮 VRA，然后是开关 SWA、SWB、SWC、SWD，分别为上 1.0、中 0.0、下 -1.0 |
 | `buttons` | 空 |
 
-### 前灯
-
-`front_light` 接受 `std_srvs/srv/SetBool` 请求：`data: true` 开灯，`data: false` 关灯。指令交给底盘后 `success` 为 true，`message` 回述新状态。
-
-本接口只控制前灯，不控制后灯。驱动每次请求都会带上指令控制标志且从不清除，所以调用过一次之后灯光由 ROS 控制，不再跟随物理开关：
-
-```bash
-ros2 service call /front_light std_srvs/srv/SetBool "{data: true}"
-```
-
-当前状态同时会在[诊断](#诊断)中给出。
-
 ### 诊断
 
 状态名以节点全名开头，例如 `/lookie_trio_base: base`，同一图中的两个节点在 `/diagnostics` 上不会冲突。
 
 | 状态 | 级别 | 键值 |
 |---|---|---|
-| `base` | OK；底盘不在 CAN 指令模式、会忽略 `cmd_vel` 时为 WARN；无 CAN 反馈时为 STALE | `control_mode`、`vehicle_state`、`error_code`、`battery_voltage`（V）、`front_light` |
+| `base` | OK；底盘不在 CAN 指令模式、会忽略 `cmd_vel` 时为 WARN；无 CAN 反馈时为 STALE | `control_mode`、`vehicle_state`、`error_code`、`battery_voltage`（V） |
 | `motor 1` … `motor 3` | OK；无 CAN 反馈时为 STALE | `rpm`、`current`（A）、`pulse_count`、`driver_voltage`（V）、`driver_temperature`（°C）、`motor_temperature`（°C）、`driver_state` |
 
 `vehicle_state`、`error_code` 和 `driver_state` 是底盘固件上报的原始代码。
@@ -151,7 +138,6 @@ ros2 launch lookie_trio_base lookie_trio_base.launch.py namespace:=base1 odom_fr
 - 退出时下发零速度，底盘不会保持最后一条指令。
 - 超过 `feedback_timeout` 未收到 CAN 运动状态时，里程计和 TF 暂停，不用缓存的旧速度积分，并打印警告；反馈恢复后继续并打印日志。期间诊断状态为 STALE。
 - 电池电压单位为 V（SDK 的值在本底盘上需乘 0.1）。
-- 前灯由 `front_light` 服务控制，其余灯光状态驱动不干预。
 - 三个电机共用一个驱动器，只发一帧低速状态：各 `motor` 诊断中的驱动器数值都相同。
 
 ## 故障排查
